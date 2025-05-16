@@ -114,33 +114,46 @@ export const App = () => {
 			<div className={styles.numpad}>
 				{NUMS.map((num) => (
 					<button
-						key={num}
+						key={`num-${num}`}
 						className={styles.button}
+						onMouseDown={(e) => e.preventDefault()}
 						onClick={() => handleNumberClick(num)}
 					>
 						{num}
 					</button>
 				))}
+
 				<button
+					key="op-plus"
 					className={`${styles.button} ${styles.operator}`}
+					onMouseDown={(e) => e.preventDefault()}
 					onClick={() => handleOperatorClick('+')}
 				>
 					+
 				</button>
+
 				<button
+					key="op-minus"
 					className={`${styles.button} ${styles.operator}`}
+					onMouseDown={(e) => e.preventDefault()}
 					onClick={() => handleOperatorClick('-')}
 				>
 					-
 				</button>
+
 				<button
+					key="reset"
 					className={`${styles.button} ${styles.reset}`}
+					onMouseDown={(e) => e.preventDefault()}
 					onClick={handleClear}
 				>
 					Reset
 				</button>
+
 				<button
+					key="equal"
 					className={`${styles.button} ${styles.wide}`}
+					onMouseDown={(e) => e.preventDefault()}
 					onClick={handleCalculate}
 				>
 					=
