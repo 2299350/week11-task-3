@@ -3,9 +3,7 @@ import styles from './App.module.css';
 
 const NUMS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0'];
 
-const cleanLeadingZeros = (value) => {
-	return value.replace(/^0+/, '') || '0';
-};
+const cleanLeadingZeros = (value) => value.replace(/^0+/, '') || '0';
 
 export const App = () => {
 	const [operand1, setOperand1] = useState('');
@@ -23,7 +21,15 @@ export const App = () => {
 	};
 
 	const handleOperatorClick = (op) => {
-		if (operand1) {
+		if (operand1 && operator && operand2) {
+			const num1 = parseInt(operand1, 10);
+			const num2 = parseInt(operand2, 10);
+			let result = operator === '+' ? num1 + num2 : num1 - num2;
+			setOperand1(result.toString());
+			setOperand2('');
+			setOperator(op);
+			setIsResult(false);
+		} else if (operand1) {
 			setOperand1(cleanLeadingZeros(operand1));
 			setOperator(op);
 			setIsResult(false);
@@ -37,18 +43,6 @@ export const App = () => {
 		setIsResult(false);
 	};
 
-	const handleCalculate = () => {
-		if (operand1 && operator && operand2) {
-			const num1 = parseInt(operand1, 10);
-			const num2 = parseInt(operand2, 10);
-			let result = operator === '+' ? num1 + num2 : num1 - num2;
-			setOperand1(result.toString());
-			setOperator('');
-			setOperand2('');
-			setIsResult(true);
-		}
-	};
-
 	useEffect(() => {
 		const handleKeyPress = (e) => {
 			const key = e.key;
@@ -60,23 +54,25 @@ export const App = () => {
 				} else {
 					setOperand2(cleanLeadingZeros(operand2 + key));
 				}
-			} else if (key === '+') {
-				if (operand1) {
-					setOperand1(cleanLeadingZeros(operand1));
-					setOperator('+');
+			} else if (key === '+' || key === '-') {
+				if (operand1 && operator && operand2) {
+					const num1 = parseInt(operand1, 10);
+					const num2 = parseInt(operand2, 10);
+					const result = operator === '+' ? num1 + num2 : num1 - num2;
+					setOperand1(result.toString());
+					setOperand2('');
+					setOperator(key);
 					setIsResult(false);
-				}
-			} else if (key === '-') {
-				if (operand1) {
+				} else if (operand1) {
 					setOperand1(cleanLeadingZeros(operand1));
-					setOperator('-');
+					setOperator(key);
 					setIsResult(false);
 				}
 			} else if (key === 'Enter' || key === '=') {
 				if (operand1 && operator && operand2) {
 					const num1 = parseInt(operand1, 10);
 					const num2 = parseInt(operand2, 10);
-					let result = operator === '+' ? num1 + num2 : num1 - num2;
+					const result = operator === '+' ? num1 + num2 : num1 - num2;
 					setOperand1(result.toString());
 					setOperator('');
 					setOperand2('');
@@ -122,7 +118,6 @@ export const App = () => {
 						{num}
 					</button>
 				))}
-
 				<button
 					key="op-plus"
 					className={`${styles.button} ${styles.operator}`}
@@ -131,7 +126,6 @@ export const App = () => {
 				>
 					+
 				</button>
-
 				<button
 					key="op-minus"
 					className={`${styles.button} ${styles.operator}`}
@@ -140,7 +134,6 @@ export const App = () => {
 				>
 					-
 				</button>
-
 				<button
 					key="reset"
 					className={`${styles.button} ${styles.reset}`}
@@ -149,12 +142,21 @@ export const App = () => {
 				>
 					Reset
 				</button>
-
 				<button
 					key="equal"
 					className={`${styles.button} ${styles.wide}`}
 					onMouseDown={(e) => e.preventDefault()}
-					onClick={handleCalculate}
+					onClick={() => {
+						if (operand1 && operator && operand2) {
+							const num1 = parseInt(operand1, 10);
+							const num2 = parseInt(operand2, 10);
+							const result = operator === '+' ? num1 + num2 : num1 - num2;
+							setOperand1(result.toString());
+							setOperator('');
+							setOperand2('');
+							setIsResult(true);
+						}
+					}}
 				>
 					=
 				</button>
