@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styles from './App.module.css';
 
 const NUMS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0'];
@@ -11,64 +11,30 @@ export const App = () => {
 	const [operand2, setOperand2] = useState('');
 	const [isResult, setIsResult] = useState(false);
 
-	const handleNumberClick = (num) => {
-		setIsResult(false);
-		if (!operator) {
-			setOperand1(cleanLeadingZeros(operand1 + num));
-		} else {
-			setOperand2(cleanLeadingZeros(operand2 + num));
-		}
-	};
-
-	const handleOperatorClick = (op) => {
-		if (operand1 && operator && operand2) {
-			const num1 = parseInt(operand1, 10);
-			const num2 = parseInt(operand2, 10);
-			let result = operator === '+' ? num1 + num2 : num1 - num2;
-			setOperand1(result.toString());
-			setOperand2('');
-			setOperator(op);
-			setIsResult(false);
-		} else if (operand1) {
-			setOperand1(cleanLeadingZeros(operand1));
-			setOperator(op);
-			setIsResult(false);
-		}
-	};
-
-	const handleClear = () => {
-		setOperand1('');
-		setOperator('');
-		setOperand2('');
-		setIsResult(false);
-	};
-
-	useEffect(() => {
-		const handleKeyPress = (e) => {
-			const key = e.key;
-
-			if (/^[0-9]$/.test(key)) {
+	const handleInput = useCallback(
+		(value) => {
+			if (/^[0-9]$/.test(value)) {
 				setIsResult(false);
 				if (!operator) {
-					setOperand1(cleanLeadingZeros(operand1 + key));
+					setOperand1(cleanLeadingZeros(operand1 + value));
 				} else {
-					setOperand2(cleanLeadingZeros(operand2 + key));
+					setOperand2(cleanLeadingZeros(operand2 + value));
 				}
-			} else if (key === '+' || key === '-') {
+			} else if (value === '+' || value === '-') {
 				if (operand1 && operator && operand2) {
 					const num1 = parseInt(operand1, 10);
 					const num2 = parseInt(operand2, 10);
 					const result = operator === '+' ? num1 + num2 : num1 - num2;
 					setOperand1(result.toString());
 					setOperand2('');
-					setOperator(key);
+					setOperator(value);
 					setIsResult(false);
 				} else if (operand1) {
 					setOperand1(cleanLeadingZeros(operand1));
-					setOperator(key);
+					setOperator(value);
 					setIsResult(false);
 				}
-			} else if (key === 'Enter' || key === '=') {
+			} else if (value === 'Enter' || value === '=') {
 				if (operand1 && operator && operand2) {
 					const num1 = parseInt(operand1, 10);
 					const num2 = parseInt(operand2, 10);
@@ -78,12 +44,12 @@ export const App = () => {
 					setOperand2('');
 					setIsResult(true);
 				}
-			} else if (key.toLowerCase() === 'c' || key === 'Escape') {
+			} else if (value.toLowerCase() === 'c' || value === 'Escape') {
 				setOperand1('');
 				setOperator('');
 				setOperand2('');
 				setIsResult(false);
-			} else if (key === 'Backspace') {
+			} else if (value === 'Backspace') {
 				setIsResult(false);
 				if (!operator) {
 					const newOperand1 = operand1.slice(0, -1);
@@ -95,11 +61,18 @@ export const App = () => {
 					setOperand2(newOperand2);
 				}
 			}
+		},
+		[operand1, operator, operand2],
+	);
+
+	useEffect(() => {
+		const handleKeyListener = (e) => {
+			handleInput(e.key);
 		};
 
-		window.addEventListener('keydown', handleKeyPress);
-		return () => window.removeEventListener('keydown', handleKeyPress);
-	}, [operand1, operand2, operator]);
+		window.addEventListener('keydown', handleKeyListener);
+		return () => window.removeEventListener('keydown', handleKeyListener);
+	}, [handleInput]);
 
 	return (
 		<div className={styles.container}>
@@ -113,7 +86,7 @@ export const App = () => {
 						key={`num-${num}`}
 						className={styles.button}
 						onMouseDown={(e) => e.preventDefault()}
-						onClick={() => handleNumberClick(num)}
+						onClick={() => handleInput(num)}
 					>
 						{num}
 					</button>
@@ -122,7 +95,7 @@ export const App = () => {
 					key="op-plus"
 					className={`${styles.button} ${styles.operator}`}
 					onMouseDown={(e) => e.preventDefault()}
-					onClick={() => handleOperatorClick('+')}
+					onClick={() => handleInput('+')}
 				>
 					+
 				</button>
@@ -130,7 +103,7 @@ export const App = () => {
 					key="op-minus"
 					className={`${styles.button} ${styles.operator}`}
 					onMouseDown={(e) => e.preventDefault()}
-					onClick={() => handleOperatorClick('-')}
+					onClick={() => handleInput('-')}
 				>
 					-
 				</button>
@@ -138,7 +111,7 @@ export const App = () => {
 					key="reset"
 					className={`${styles.button} ${styles.reset}`}
 					onMouseDown={(e) => e.preventDefault()}
-					onClick={handleClear}
+					onClick={() => handleInput('c')}
 				>
 					Reset
 				</button>
@@ -146,17 +119,7 @@ export const App = () => {
 					key="equal"
 					className={`${styles.button} ${styles.wide}`}
 					onMouseDown={(e) => e.preventDefault()}
-					onClick={() => {
-						if (operand1 && operator && operand2) {
-							const num1 = parseInt(operand1, 10);
-							const num2 = parseInt(operand2, 10);
-							const result = operator === '+' ? num1 + num2 : num1 - num2;
-							setOperand1(result.toString());
-							setOperator('');
-							setOperand2('');
-							setIsResult(true);
-						}
-					}}
+					onClick={() => handleInput('=')}
 				>
 					=
 				</button>
